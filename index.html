@@ -93,8 +93,8 @@ table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:7px;borde
 <div class="row"><label>Compression φ</label><input id="phiComp" type="number" value="0.65" min="0.65" max="0.75" step="0.01"><span class="unit">—</span></div>
 <div class="row"><label>Seismic detailing</label><select id="seismic"><option value="no" selected>General detailing</option><option value="yes">Special seismic detailing required</option></select></div></div>
 <h2>6. Automatic Bar Selection</h2><div class="section">
-<div class="row"><label>Minimum main bar Ø</label><select id="minBar"><option>10</option><option selected>12</option><option>16</option></select><span class="unit">mm</span></div>
-<div class="row"><label>Maximum main bar Ø</label><select id="maxBar"><option>16</option><option selected>20</option><option>25</option><option>32</option></select><span class="unit">mm</span></div>
+<div class="row"><label>Minimum main bar Ø</label><select id="minBar"><option value="16" selected>Ø16 mm</option></select><span class="unit">mm</span></div>
+<div class="row"><label>Maximum main bar Ø</label><select id="maxBar"><option value="16" selected>Ø16 mm</option></select><span class="unit">mm</span></div>
 <div class="row"><label>Maximum footing spacing</label><input id="maxFootSpace" type="number" value="300" min="75" step="25"><span class="unit">mm</span></div>
 <div class="row"><label>Beam stirrup diameter</label><select id="stirrupDia"><option value="10">Ø10 mm</option></select><span class="unit">mm</span></div>
 <div class="row"><label>Maximum beam stirrup spacing</label><input id="maxStirSpace" type="number" value="100" min="75" step="25"><span class="unit">mm</span></div>
@@ -129,7 +129,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:7px;borde
 <script>
 const $=id=>document.getElementById(id), n=id=>parseFloat($(id).value)||0;
 const fmt=(x,d=2)=>Number(x||0).toLocaleString(undefined,{minimumFractionDigits:d,maximumFractionDigits:d});
-const BAR=[10,12,16,20,25,28,32], A=d=>Math.PI*d*d/4, W=d=>d*d/162;
+const BAR=[16], A=d=>Math.PI*d*d/4, W=d=>d*d/162;
 function beta1(fc){return fc<=28?0.85:Math.max(.65,.85-.05*(fc-28)/7)}
 function phiFlex(e){return e>=.005?.90:e<=.002?.65:.65+(e-.002)*.25/.003}
 function beamAs(M,b,d,fc,fy){let Mn=M*1e6;for(let As=50;As<=b*d*.08;As+=5){let a=As*fy/(.85*fc*b),c=a/beta1(fc),et=.0035*(d-c)/c,p=phiFlex(et);if(p*As*fy*(d-a/2)>=Mn)return{As,a,c,p}}return null}
