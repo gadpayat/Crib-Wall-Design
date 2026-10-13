@@ -9,8 +9,8 @@
 *{box-sizing:border-box} body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(135deg,#e8eef3,#f8fafc);color:var(--ink)}
 header{background:linear-gradient(110deg,#123b5d,#1769aa);color:#fff;padding:18px 24px;box-shadow:0 3px 12px #0002}
 header h1{margin:0;font-size:25px} header p{margin:5px 0 0;opacity:.9;font-size:13px}
-.wrap{max-width:1500px;margin:auto;padding:18px}
-.grid{display:grid;grid-template-columns:360px minmax(500px,1fr) 520px;gap:16px;align-items:start}
+.wrap{max-width:1900px;width:100%;margin:0 auto;padding:18px}
+.grid{display:grid;grid-template-columns:minmax(300px,360px) minmax(420px,1.15fr) minmax(420px,1fr);gap:16px;align-items:start}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 5px 18px #17324d12;padding:16px}
 .card h2{font-size:16px;margin:0 0 12px;color:var(--blue2);border-bottom:1px solid var(--line);padding-bottom:9px}
 .section{margin-bottom:16px}.row{display:grid;grid-template-columns:1fr 100px;gap:8px;align-items:center;margin:8px 0}
@@ -31,7 +31,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:7px;borde
 .footer{margin-top:14px;text-align:center;color:#657583;font-size:10px}
 
 .primaryInput input{font-size:18px;font-weight:700;border:2px solid #1769aa;background:#f3f9ff}.primaryInput label{font-size:14px;color:#0d4775}.advanced{margin-top:10px;border:1px solid var(--line);border-radius:10px;background:#f8fafc}.advanced summary{cursor:pointer;padding:11px 13px;font-weight:700;color:var(--blue2);font-size:12px}.advancedBody{padding:0 12px 8px}.advancedBody h2{margin-top:12px}.advancedBody .section{margin-bottom:10px}
-@media(max-width:1100px){.grid{grid-template-columns:1fr}.card{width:100%}}
+@media(max-width:1250px){.grid{grid-template-columns:minmax(280px,360px) minmax(0,1fr)}.results{grid-column:1 / -1}}@media(max-width:760px){.grid{grid-template-columns:1fr}.results{grid-column:auto}.card{width:100%}}
 @media print{header,.inputs,.actions,.footer{display:none!important}.grid{display:block}.card{box-shadow:none;border:0}.canvasWrap{border:1px solid #888}body{background:#fff}.results{margin-top:20px}}
 </style>
 </head>
