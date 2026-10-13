@@ -53,7 +53,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:7px;borde
 <div class="row"><label>Foundation embedment</label><input id="embed" type="number" value="0.60" min="0" step="0.05"><span class="unit">m</span></div>
 <div class="row"><label>Footing width</label><input id="fw" type="number" value="1.20" min="0.1" step="0.05"><span class="unit">m</span></div>
 <div class="row"><label>Footing thickness</label><input id="ft" type="number" value="0.30" min="0.1" step="0.05"><span class="unit">m</span></div></div>
-<details class="advanced" open><summary>ADVANCED DESIGN ASSUMPTIONS & OVERRIDES</summary><div class="advancedBody"><h2>2. Automatic Structural Components</h2><div class="status"><b>Automatic sizing:</b> Based primarily on wall height and length. Turn OFF only if you want to manually override the generated preliminary member geometry.</div><div class="row"><label>Automatic structural sizing</label><select id="autoSize"><option value="yes" selected>YES — derive from wall L × H</option><option value="no">NO — use manual values below</option></select><span class="unit">mode</span></div><div class="section">
+<details class="advanced" open><summary>ADVANCED DESIGN ASSUMPTIONS & OVERRIDES</summary><div class="advancedBody"><h2>2. Automatic Structural Components</h2><div class="status"><b>Automatic sizing:</b> Based primarily on wall height and length. Turn OFF only if you want to manually override the generated preliminary member geometry.</div><div class="row"><label>Automatic structural sizing</label><select id="autoSize"><option value="yes" selected>YES — derive from wall L × H</option><option value="no">NO — use manual values below</option></select><span class="unit">mode</span></div><div class="row"><label><b>Beam / column spacing control</b></label><select id="spacingMode"><option value="manual" selected>MANUAL — use entered spacing</option><option value="auto">AUTOMATIC — derive from wall height</option></select><span class="unit">mode</span></div><div class="status" style="margin:8px 0 12px">Set <b>Column spacing</b> and <b>Horizontal beam spacing</b> directly when spacing control is MANUAL. The entered values are used in the preliminary quantities and drawing. Automatic structural sizing may still calculate other member dimensions.</div><div class="section">
 <div class="row"><label>Structural trigger height</label><input id="trigger" type="number" value="3.00" min="0.1" step="0.1"><span class="unit">m</span></div>
 <div class="row"><label>Column spacing</label><input id="cs" type="number" value="2.50" min="0.5" step="0.1"><span class="unit">m</span></div>
 <div class="row"><label>Column width</label><input id="cw" type="number" value="0.25" min="0.1" step="0.01"><span class="unit">m</span></div>
@@ -159,8 +159,12 @@ function autoGeometry(){
   const L=n('L'), H=n('H');
   // Preliminary geometry rules: intentionally transparent and editable in the advanced panel.
   // These are sizing heuristics, not a substitute for complete structural analysis.
-  const cs = H<=3 ? 2.50 : H<=5 ? 2.00 : H<=7 ? 1.75 : 1.50;
-  const bs = H<=3 ? 1.50 : H<=4.5 ? 1.35 : H<=6 ? 1.20 : 1.00;
+  const autoCs = H<=3 ? 2.50 : H<=5 ? 2.00 : H<=7 ? 1.75 : 1.50;
+  const autoBs = H<=3 ? 1.50 : H<=4.5 ? 1.35 : H<=6 ? 1.20 : 1.00;
+  // In MANUAL mode, preserve the user's entered spacing values.
+  const manualSpacing = $('spacingMode').value === 'manual';
+  const cs = manualSpacing ? Math.max(0.5, n('cs')) : autoCs;
+  const bs = manualSpacing ? Math.max(0.5, n('bs')) : autoBs;
   const cols = Math.max(2,Math.ceil(L/cs)+1);
   const fw = Math.max(.90,Math.min(2.00,0.28*H+0.20));
   const ft = Math.max(.30,Math.min(.65,0.08*H+0.05));
@@ -168,7 +172,7 @@ function autoGeometry(){
   const cd = cw;
   const bw = H<=3.5 ? .25 : H<=5 ? .30 : H<=7 ? .35 : .40;
   const bd = H<=3.5 ? .40 : H<=5 ? .45 : H<=7 ? .50 : .60;
-  $('cs').value=cs.toFixed(2); $('bs').value=bs.toFixed(2);
+  if (!manualSpacing) { $('cs').value=cs.toFixed(2); $('bs').value=bs.toFixed(2); }
   $('fw').value=fw.toFixed(2); $('ft').value=ft.toFixed(2);
   $('cw').value=cw.toFixed(2); $('cd').value=cd.toFixed(2);
   $('bh').value=bw.toFixed(2); $('bd').value=bd.toFixed(2);
@@ -206,6 +210,6 @@ let issues=[];if(struct){if(fo.q>qa)issues.push('Footing bearing exceeds qa.');i
 draw({L,H,t,batt,embed,fw,ft,struct,cols,cw,cd,bh,bd,bs,rows,filter,weeps});}
 function draw(v){let c=$('drawing'),x=c.getContext('2d'),W=c.width,H= c.height;x.clearRect(0,0,W,H);x.fillStyle='#fff';x.fillRect(0,0,W,H);let s=Math.min(420/(v.H+v.embed+1),650/(v.L+v.fw+1)),ox=120,g=475,base=ox+v.fw*s,wb=g-v.embed*s,top=wb-v.H*s,lean=Math.tan(v.batt*Math.PI/180)*v.H*s,tx=base+lean;x.strokeStyle='#445';x.lineWidth=3;x.beginPath();x.moveTo(40,g);x.lineTo(W-30,g);x.stroke();x.fillStyle='#edf1e7';x.fillRect(40,g+2,W-70,110);if(v.struct){x.fillStyle='#aab5bf';x.strokeStyle='#46525d';let fx=base-v.fw*s*.45;x.fillRect(fx,wb,v.fw*s,v.ft*s);x.strokeRect(fx,wb,v.fw*s,v.ft*s)}let lb=base+v.t*s,lt=tx+v.t*s;x.fillStyle='#b8b8b8';x.strokeStyle='#3e464d';x.beginPath();x.moveTo(base,wb);x.lineTo(tx,top);x.lineTo(lt,top);x.lineTo(lb,wb);x.closePath();x.fill();x.stroke();x.save();x.clip();x.strokeStyle='#888';for(let y=top+8;y<wb;y+=15){x.beginPath();x.moveTo(base-5,y);x.lineTo(lt+8,y+4);x.stroke()}x.restore();x.fillStyle='#d9c8a4';x.globalAlpha=.75;x.beginPath();x.moveTo(lb,wb);x.lineTo(lt,top);x.lineTo(lt+v.filter*s,top);x.lineTo(lb+v.filter*s,wb);x.closePath();x.fill();x.globalAlpha=1;if(v.struct){x.fillStyle='#7c8994';for(let i=0;i<v.cols;i++){let xx=base+(i/Math.max(1,v.cols-1))*(tx-base)+v.t*s/2-v.cw*s/2;x.fillRect(xx,top,v.cw*s,wb-top);x.strokeRect(xx,top,v.cw*s,wb-top)}for(let j=1;j<=v.rows;j++){let yy=wb-(j/(v.rows+1))*v.H*s;x.fillRect(base-2,yy-v.bh*s/2,(v.t+v.filter+.05)*s+2,v.bh*s)}}x.fillStyle='#12679e';let holes=Math.min(12,Math.max(3,Math.ceil(v.L/1.5)));for(let i=1;i<=holes;i++){let f=i/(holes+1),yy=wb-v.H*s*.18,xx=base+(tx-base)*.18+f*Math.min(180,v.L*s*.25);x.beginPath();x.arc(xx,yy,4,0,7);x.fill()}x.fillStyle='#17212b';x.font='13px Arial';dim(x,base-45,wb,base-45,top,'H = '+fmt(v.H)+' m');dim(x,base,g+48,base+v.fw*s,g+48,'Footing = '+fmt(v.fw)+' m');x.fillText('Ground level',45,g-8);x.fillText('Backfill',W-105,top+28);x.fillText('Grouted riprap',tx+12,(top+wb)/2);if(v.struct){x.fillText('RC columns',base+90,top+65);x.fillText('RC footing',base-10,wb+v.ft*s/2+4);x.fillText('RC beams',base+95,wb-v.H*s*.55)}x.font='bold 15px Arial';x.fillText('PRELIMINARY SECTION — NSCP/ACI RSB MODE',35,35)}
 function dim(c,x1,y1,x2,y2,l){c.strokeStyle='#1769aa';c.fillStyle='#1769aa';c.lineWidth=1.5;c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();c.beginPath();c.moveTo(x1-5,y1);c.lineTo(x1+5,y1);c.stroke();c.beginPath();c.moveTo(x2-5,y2);c.lineTo(x2+5,y2);c.stroke();c.save();c.translate(x1-10,(y1+y2)/2);c.rotate(-Math.PI/2);c.fillText(l,0,0);c.restore()}
-document.querySelectorAll('input,select').forEach(e=>e.addEventListener('input',calculate));calculate();
+document.querySelectorAll('input').forEach(e=>e.addEventListener('input',calculate));document.querySelectorAll('select').forEach(e=>e.addEventListener('change',calculate));calculate();
 </script>
 </body>
